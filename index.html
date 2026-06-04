@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chinese Rhythm Sync</title>
     <style>
-        /* Global Dark Mode Styling */
+        /* S22 Ultra Mobile-First Optimizations */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: #0f172a;
@@ -13,36 +13,42 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
+            padding: 16px;
             margin: 0;
+            min-height: 100vh;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent; /* Removes touch flash delay on mobile Chrome */
         }
 
         .container {
-            max-width: 600px;
+            max-width: 500px;
             width: 100%;
             background: #1e293b;
-            padding: 25px;
+            padding: 20px;
             border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
         }
 
         h1 {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             text-align: center;
-            margin-bottom: 20px;
+            margin: 0 0 15px 0;
             color: #f1f5f9;
         }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #94a3b8;
         }
 
@@ -56,46 +62,44 @@
             color: #f8fafc;
             box-sizing: border-box;
             outline: none;
-            transition: border-color 0.2s;
         }
 
         input[type="text"]:focus {
             border-color: #38bdf8;
         }
 
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 25px;
-        }
-
-        button {
-            padding: 14px;
-            font-size: 1rem;
-            font-weight: bold;
-            border: none;
+        /* Full Sentence Preview with Dim Text */
+        .sentence-preview {
+            background-color: #0f172a;
+            border: 1px solid #334155;
             border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.1s, transform 0.05s;
+            padding: 12px;
+            margin-bottom: 15px;
+            min-height: 50px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
         }
 
-        button:active {
-            transform: scale(0.97);
+        .preview-word {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #475569; /* Dim color by default */
+            transition: color 0.05s ease, text-shadow 0.05s ease;
         }
 
-        .btn-record { background-color: #ef4444; color: white; }
-        .btn-record.recording { background-color: #b91c1c; animation: pulse 1.5s infinite; }
-        
-        /* Fast-response performance coloring for Play */
-        .btn-play { background-color: #0ea5e9; color: white; }
-        .btn-play:active { background-color: #0284c7; }
-        .btn-play:disabled { background-color: #334155; color: #64748b; cursor: not-allowed; }
-        
-        /* Interactive Tap Zone */
+        .preview-word.active {
+            color: #38bdf8; /* Highlighted color */
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+
+        /* The Interactive Tap Area */
         .tap-zone {
             width: 100%;
-            height: 150px;
+            flex-grow: 1;
+            min-height: 180px;
             background-color: #1e293b;
             border: 3px dashed #475569;
             border-radius: 12px;
@@ -107,10 +111,11 @@
             color: #94a3b8;
             cursor: pointer;
             user-select: none;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             text-align: center;
-            padding: 10px;
+            padding: 15px;
             box-sizing: border-box;
+            touch-action: manipulation; /* Optimizes for mobile tap response speeds */
         }
 
         .tap-zone:active {
@@ -118,33 +123,58 @@
             border-color: #64748b;
         }
 
-        /* High-contrast Display Arena */
-        .display-box {
-            min-height: 120px;
-            background: #0f172a;
-            color: #38bdf8;
-            border: 2px solid #334155;
-            border-radius: 12px;
+        /* Bottom Controls Layout for Thumb Reach */
+        .controls-container {
+            margin-top: auto;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 3.5rem;
-            font-weight: bold;
-            padding: 20px;
-            text-align: center;
-            letter-spacing: 2px;
+            flex-direction: column;
+            gap: 10px;
         }
+
+        .grid-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        button {
+            padding: 15px 10px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            transition: opacity 0.1s;
+            touch-action: manipulation;
+        }
+
+        button:active {
+            opacity: 0.8;
+        }
+
+        #recordBtn { background-color: #ef4444; }
+        #recordBtn.ready-to-tap { background-color: #f59e0b; animation: pulse 1.5s infinite; }
+        #recordBtn.recording { background-color: #b91c1c; }
+        
+        #concludeBtn { background-color: #10b981; }
+        #concludeBtn:disabled { background-color: #1e293b; border: 1px solid #334155; color: #475569; }
+
+        #playBtn { background-color: #0ea5e9; }
+        #playBtn:disabled { background-color: #334155; color: #64748b; cursor: not-allowed; }
+
+        #retryBtn { background-color: #64748b; }
 
         .status-text {
             text-align: center;
             font-size: 0.85rem;
             color: #64748b;
-            margin-top: 10px;
+            margin-top: 8px;
         }
 
         @keyframes pulse {
             0% { opacity: 1; }
-            50% { opacity: 0.6; }
+            50% { opacity: 0.7; }
             100% { opacity: 1; }
         }
     </style>
@@ -159,131 +189,240 @@
         <input type="text" id="sentenceInput" value="父母 给予 我 极大的 支持。">
     </div>
 
-    <div class="controls">
-        <button id="recordBtn" class="btn-record">Start Recording</button>
-        <button id="playBtn" class="btn-play" disabled>Play Rhythm</button>
-    </div>
+    <div id="sentencePreview" class="sentence-preview"></div>
 
     <div id="tapZone" class="tap-zone">
         Tap here to set the rhythm!
     </div>
 
-    <div id="displayBox" class="display-box">
-        ...
+    <div class="controls-container">
+        <div class="grid-buttons">
+            <button id="recordBtn">Start Recording</button>
+            <button id="concludeBtn" disabled>Conclude Run</button>
+        </div>
+        <div class="grid-buttons">
+            <button id="playBtn" disabled>Play Rhythm</button>
+            <button id="retryBtn">Retry / Reset</button>
+        </div>
+        <div id="status" class="status-text">Ready.</div>
     </div>
-    
-    <div id="status" class="status-text">Ready.</div>
 </div>
 
 <script>
-    // App State
+    // App State Configuration
     let words = [];
     let recordedTimestamps = [];
+    let isArmed = false; 
     let isRecording = false;
     let currentIdx = 0;
     let startTime = 0;
     let playbackTimeoutIds = [];
 
-    // DOM Elements
+    // Elements
     const sentenceInput = document.getElementById('sentenceInput');
+    const sentencePreview = document.getElementById('sentencePreview');
     const recordBtn = document.getElementById('recordBtn');
+    const concludeBtn = document.getElementById('concludeBtn');
     const playBtn = document.getElementById('playBtn');
+    const retryBtn = document.getElementById('retryBtn');
     const tapZone = document.getElementById('tapZone');
-    const displayBox = document.getElementById('displayBox');
     const statusText = document.getElementById('status');
 
-    // Parse items by spaces instead of individual characters
-    function parseSentence() {
+    // Parse text field and build the dim UI overlay elements
+    function renderSentencePreview() {
         const text = sentenceInput.value.trim();
-        // Split by one or more spaces
-        words = text.split(/\s+/).filter(word => word !== "");
-        return words;
+        words = text.split(/\s+/).filter(w => w !== "");
+        
+        sentencePreview.innerHTML = '';
+        words.forEach((word, index) => {
+            const span = document.createElement('span');
+            span.className = 'preview-word';
+            span.id = `word-${index}`;
+            span.textContent = word;
+            sentencePreview.appendChild(span);
+        });
+
+        // Save layout configuration to local storage
+        localStorage.setItem('savedSentence', text);
     }
 
-    // Start/Prepare recording sequence
-    recordBtn.addEventListener('click', () => {
-        parseSentence();
-        if (words.length === 0) {
-            alert("Please input space-separated words first!");
-            return;
-        }
+    // Reset active visual states back to default dim values
+    function clearVisualHighlights() {
+        document.querySelectorAll('.preview-word').forEach(span => {
+            span.classList.remove('active');
+        });
+    }
+
+    // Step 1: Arm the recording system
+    recordBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        renderSentencePreview();
+        if (words.length === 0) return;
 
         clearPlayback();
+        clearVisualHighlights();
 
-        isRecording = true;
+        isArmed = true;
+        isRecording = false;
         recordedTimestamps = [];
         currentIdx = 0;
-        startTime = performance.now();
-        
-        recordBtn.textContent = "Recording...";
-        recordBtn.classList.add('recording');
+
+        recordBtn.textContent = "Waiting for 1st Tap...";
+        recordBtn.className = "ready-to-tap";
+        concludeBtn.disabled = false;
         playBtn.disabled = true;
-        
-        displayBox.textContent = "ーー";
-        statusText.textContent = `Tap match rhythm! Word 1 / ${words.length}`;
-        tapZone.textContent = `TAP NOW for: ${words[0]}`;
+
+        tapZone.textContent = `Tap to begin! First word: ${words[0]}`;
+        statusText.textContent = "Timer starts structural tracking on your very first tap.";
     });
 
-    // Handle Tap input
+    // Handle Tap interaction (using pointerdown for instant mobile responsiveness)
     tapZone.addEventListener('pointerdown', (e) => {
-        if (!isRecording) return;
-        e.preventDefault(); 
+        e.preventDefault();
+        
+        if (!isArmed && !isRecording) return;
+
+        // Dynamic Start Logic: Start tracking timing now on the first tap
+        if (isArmed && !isRecording) {
+            isArmed = false;
+            isRecording = true;
+            startTime = performance.now();
+            recordBtn.textContent = "Recording...";
+            recordBtn.className = "recording";
+        }
 
         const currentTapTime = performance.now() - startTime;
-        
+
         if (currentIdx < words.length) {
-            // Save relative millisecond timestamp for the whole word cluster
+            // Document time offset
             recordedTimestamps.push({
                 word: words[currentIdx],
                 timeOffset: currentTapTime
             });
 
-            // Flash the word instantly
-            displayBox.textContent = words[currentIdx];
-            
+            // Handle lighting up the preview display
+            clearVisualHighlights();
+            const activeSpan = document.getElementById(`word-${currentIdx}`);
+            if (activeSpan) activeSpan.classList.add('active');
+
             currentIdx++;
 
             if (currentIdx < words.length) {
-                statusText.textContent = `Recorded ${currentIdx} / ${words.length}`;
                 tapZone.textContent = `TAP NOW for: ${words[currentIdx]}`;
+                statusText.textContent = `Tapped ${currentIdx} / ${words.length}`;
             } else {
-                // End Recording session
-                isRecording = false;
-                recordBtn.textContent = "Start Recording";
-                recordBtn.classList.remove('recording');
-                playBtn.disabled = false;
-                tapZone.textContent = "Rhythm Saved!";
-                statusText.textContent = "Ready for manual playback.";
+                // Autocomplete once all array structures are successfully filled
+                finishRecording();
             }
         }
     });
 
-    // Rapid Manual Playback Launch
-    playBtn.addEventListener('click', () => {
-        if (recordedTimestamps.length === 0) return;
-        
-        // Wipe clean previous unfinished timers instantly
-        clearPlayback();
-        
-        statusText.textContent = "Playing...";
-        
-        // Zero out the display box immediately upon execution
-        displayBox.textContent = "ーー"; 
+    // Step 2: Finalize rhythm metrics
+    concludeBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (isRecording || isArmed) {
+            finishRecording();
+        }
+    });
 
-        // Execute the single run sequence
-        recordedTimestamps.forEach((stamp) => {
+    function finishRecording() {
+        isArmed = false;
+        isRecording = false;
+        recordBtn.textContent = "Start Recording";
+        recordBtn.className = "";
+        concludeBtn.disabled = true;
+        
+        if (recordedTimestamps.length > 0) {
+            playBtn.disabled = false;
+            localStorage.setItem('savedTimestamps', JSON.stringify(recordedTimestamps));
+            tapZone.textContent = "Rhythm Saved to Storage!";
+            statusText.textContent = "Recording locked. Ready to play back.";
+        } else {
+            tapZone.textContent = "No taps registered.";
+            statusText.textContent = "Ready.";
+        }
+    }
+
+    // Direct Manual Playback Engine
+    playBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (recordedTimestamps.length === 0) return;
+
+        clearPlayback();
+        clearVisualHighlights();
+        statusText.textContent = "Playing match layout...";
+
+        recordedTimestamps.forEach((stamp, index) => {
             let id = setTimeout(() => {
-                displayBox.textContent = stamp.word;
+                clearVisualHighlights();
+                const currentSpan = document.getElementById(`word-${index}`);
+                if (currentSpan) currentSpan.classList.add('active');
+                
+                // Clear the final word highlight slightly after completion
+                if (index === recordedTimestamps.length - 1) {
+                    let endId = setTimeout(() => {
+                        clearVisualHighlights();
+                        statusText.textContent = "Playback Finished.";
+                    }, 800);
+                    playbackTimeoutIds.push(endId);
+                }
             }, stamp.timeOffset);
-            
+
             playbackTimeoutIds.push(id);
         });
+    });
+
+    // Reset UI state cleanly
+    function resetApp() {
+        clearPlayback();
+        clearVisualHighlights();
+        isArmed = false;
+        isRecording = false;
+        recordedTimestamps = [];
+        currentIdx = 0;
+        
+        recordBtn.textContent = "Start Recording";
+        recordBtn.className = "";
+        concludeBtn.disabled = true;
+        playBtn.disabled = true;
+        
+        tapZone.textContent = "Tap here to set the rhythm!";
+        statusText.textContent = "Reset complete.";
+        renderSentencePreview();
+    }
+
+    retryBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        resetApp();
     });
 
     function clearPlayback() {
         playbackTimeoutIds.forEach(id => clearTimeout(id));
         playbackTimeoutIds = [];
     }
+
+    // Event listener to render layout instantly when user changes text value
+    sentenceInput.addEventListener('input', renderSentencePreview);
+
+    // Initialization Sequence (Pulls data from memory on browser boot)
+    window.addEventListener('DOMContentLoaded', () => {
+        const storedSentence = localStorage.getItem('savedSentence');
+        const storedTimestamps = localStorage.getItem('savedTimestamps');
+
+        if (storedSentence) {
+            sentenceInput.value = storedSentence;
+        }
+        
+        renderSentencePreview();
+
+        if (storedTimestamps) {
+            recordedTimestamps = JSON.parse(storedTimestamps);
+            if (recordedTimestamps.length > 0) {
+                playBtn.disabled = false;
+                statusText.textContent = "Loaded last saved rhythm from memory.";
+            }
+        }
+    });
 </script>
 
 </body>
