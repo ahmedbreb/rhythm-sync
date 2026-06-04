@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chinese Rhythm Sync</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #4da6ff;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        button {
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-record { background-color: #ff4d4d; color: white; }
+        .btn-record.recording { background-color: #cc0000; animation: pulse 1.5s infinite; }
+        .btn-play { background-color: #4caf50; color: white; }
+        .btn-play:disabled { background-color: #cccccc; cursor: not-allowed; }
+        
+        /* The massive Tap target area for mobile/desktop entry */
+        .tap-zone {
+            width: 100%;
+            height: 150px;
+            background-color: #f0f4f8;
+            border: 3px dashed #cbd5e1;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 25px;
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .tap-zone:active {
+            background-color: #e2e8f0;
+        }
+
+        /* Display Arena for the Characters */
+        .display-box {
+            min-height: 120px;
+            background: #1e293b;
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: bold;
+            padding: 20px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .status-text {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 10px;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Chinese Rhythm Sync</h1>
+
+    <div class="input-group">
+        <label for="sentenceInput">Enter Chinese Sentence (No spaces needed):</label>
+        <input type="text" id="sentenceInput" value="你好吗" placeholder="e.g., 很高兴认识你">
+    </div>
+
+    <div class="controls">
+        <button id="recordBtn" class="btn-record">Start Recording</button>
+        <button id="playBtn" class="btn-play" disabled>Play Rhythm</button>
+    </div>
+
+    <div id="tapZone" class="tap-zone">
+        Tap here to set the rhythm!
+    </div>
+
+    <div id="displayBox" class="display-box">
+        ...
+    </div>
+    
+    <div id="status" class="status-text">Ready to setup.</div>
+</div>
+
+<script>
+    // App State Variables
+    let characters = [];
+    let recordedTimestamps = [];
+    let isRecording = false;
+    let currentIdx = 0;
+    let startTime = 0;
+    let playbackTimeoutIds = [];
+
+    // Elements
+    const sentenceInput = document.getElementById('sentenceInput');
+    const recordBtn = document.getElementById('recordBtn');
+    const playBtn = document.getElementById('playBtn');
+    const tapZone = document.getElementById('tapZone');
+    const displayBox = document.getElementById('displayBox');
+    const statusText = document.getElementById('status');
+
+    // Prepare character array split up cleanly
+    function parseSentence() {
+        const text = sentenceInput.value.trim();
+        // Filters out spaces or accidental punctuation to strictly focus on characters
+        characters = Array.from(text).filter(char => char.trim() !== "");
+        return characters;
+    }
+
+    // Toggle Recording mode
+    recordBtn.addEventListener('click', () => {
+        parseSentence();
+        if (characters.length === 0) {
+            alert("Please input a sentence first!");
+            return;
+        }
+
+        // Cancel any running playbacks
+        clearPlayback();
+
+        isRecording = true;
+        recordedTimestamps = [];
+        currentIdx = 0;
+        startTime = performance.now();
+        
+        recordBtn.textContent = "Recording... Tap Zone Below!";
+        recordBtn.classList.add('recording');
+        playBtn.disabled = true;
+        
+        displayBox.textContent = "ーー";
+        statusText.textContent = `Tap match rhythm! Character 1 / ${characters.length}`;
+        tapZone.textContent = `TAP NOW for: ${characters[0]}`;
+    });
+
+    // Handle Tap Input (Works great on mobile touch too)
+    tapZone.addEventListener('pointerdown', (e) => {
+        if (!isRecording) return;
+        e.preventDefault(); // Prevents zoom/double tap issues on mobile platforms
+
+        const currentTapTime = performance.now() - startTime;
+        
+        if (currentIdx < characters.length) {
+            // Save relative millisecond timestamp for this specific character index
+            recordedTimestamps.push({
+                char: characters[currentIdx],
+                timeOffset: currentTapTime
+            });
+
+            // Flash character immediately in the preview panel
+            displayBox.textContent = characters[currentIdx];
+            
+            currentIdx++;
+
+            if (currentIdx < characters.length) {
+                statusText.textContent = `Recorded ${currentIdx} / ${characters.length}`;
+                tapZone.textContent = `TAP NOW for: ${characters[currentIdx]}`;
+            } else {
+                // Done recording all characters in the sequence
+                isRecording = false;
+                recordBtn.textContent = "Start Recording";
+                recordBtn.classList.remove('recording');
+                playBtn.disabled = false;
+                tapZone.textContent = "Rhythm Saved! Press 'Play Rhythm'";
+                statusText.textContent = "Recording Complete. Ready for continuous playback.";
+            }
+        }
+    });
+
+    // Handle Continuous Playback
+    playBtn.addEventListener('click', () => {
+        if (recordedTimestamps.length === 0) return;
+        clearPlayback();
+        statusText.textContent = "Playing back rhythm loop...";
+        runPlaybackLoop();
+    });
+
+    function runPlaybackLoop() {
+        displayBox.textContent = "ーー"; // Reset screen visual at loop launch
+
+        recordedTimestamps.forEach((stamp, index) => {
+            let id = setTimeout(() => {
+                displayBox.textContent = stamp.char;
+                
+                // If this is the final character, schedule the sequence loop to restart
+                if (index === recordedTimestamps.length - 1) {
+                    let loopId = setTimeout(() => {
+                        runPlaybackLoop();
+                    }, 1200); // Small natural rest delay before the loop repeats sentence
+                    playbackTimeoutIds.push(loopId);
+                }
+            }, stamp.timeOffset);
+            
+            playbackTimeoutIds.push(id);
+        });
+    }
+
+    function clearPlayback() {
+        playbackTimeoutIds.forEach(id => clearTimeout(id));
+        playbackTimeoutIds = [];
+    }
+</script>
+
+</body>
+</html>
