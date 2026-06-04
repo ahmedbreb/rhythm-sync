@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chinese Rhythm Sync</title>
     <style>
-        /* Base Dark Mode Settings for Samsung S22 Ultra */
+        /* Base Settings Optimized for Samsung S22 Ultra Layouts */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: #0f172a;
@@ -31,6 +31,17 @@
             display: flex;
             flex-direction: column;
             min-height: calc(100vh - 32px);
+            transition: all 0.2s ease;
+        }
+
+        /* Container adjustment for immersive full screen */
+        .container.immersive-active {
+            max-width: 100%;
+            background: #0f172a;
+            padding: 10px;
+            box-shadow: none;
+            min-height: 100vh;
+            border-radius: 0;
         }
 
         h1 {
@@ -40,7 +51,7 @@
             color: #f1f5f9;
         }
 
-        /* View Switching Logic */
+        /* Multi-View System Visibility Rules */
         .app-view {
             display: none;
             flex-direction: column;
@@ -79,7 +90,6 @@
             border-color: #38bdf8;
         }
 
-        /* Setup View Sentence Preview styling */
         .sentence-preview {
             background-color: #0f172a;
             border: 1px solid #334155;
@@ -106,7 +116,6 @@
             text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
         }
 
-        /* Tap Capture Area */
         .tap-zone {
             width: 100%;
             flex-grow: 1;
@@ -134,7 +143,7 @@
             border-color: #64748b;
         }
 
-        /* VIEW 2: Focus View UI Layout */
+        /* VIEW 2: Focus Standard View Elements */
         .focus-box {
             width: 100%;
             height: 180px;
@@ -145,7 +154,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 4.2rem; /* Massive typography layout */
+            font-size: 3.8rem;
             font-weight: bold;
             padding: 15px;
             text-align: center;
@@ -154,7 +163,6 @@
             text-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
         }
 
-        /* Notes Window Textarea Component */
         .notes-window {
             width: 100%;
             flex-grow: 1;
@@ -172,11 +180,61 @@
             margin-bottom: 15px;
         }
 
-        .notes-window:focus {
-            border-color: #38bdf8;
+        /* VIEW 3: Immersive Fullscreen Mode Layout */
+        .immersive-top-nav {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            padding: 10px 15px;
+            box-sizing: border-box;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
         }
 
-        /* Navigation & Dashboard Actions Grouping */
+        .faint-nav-btn {
+            background: none;
+            border: none;
+            color: #334155; /* Faint gray to completely blend out */
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .faint-nav-btn:active {
+            color: #64748b;
+        }
+
+        .fullscreen-tap-arena {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #0f172a;
+            cursor: pointer;
+            user-select: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            box-sizing: border-box;
+            padding: 30px;
+            touch-action: manipulation;
+        }
+
+        .giant-display-text {
+            font-size: 5.5rem; /* Massive font delivery */
+            font-weight: 900;
+            color: #38bdf8;
+            text-align: center;
+            text-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+            pointer-events: none; /* Passes touch events straight through to the arena */
+        }
+
+        /* Button Framework */
         .controls-container {
             margin-top: auto;
             display: flex;
@@ -213,7 +271,7 @@
         #playBtn, #focusPlayBtn { background-color: #0ea5e9; }
         #playBtn:disabled { background-color: #334155; color: #64748b; cursor: not-allowed; }
 
-        #toFocusViewBtn { background-color: #8b5cf6; } /* Purple navigation asset */
+        #toFocusViewBtn, #toImmersiveViewBtn { background-color: #8b5cf6; } 
         #toFocusViewBtn:disabled { background-color: #334155; color: #64748b; cursor: not-allowed; }
         
         #toSetupViewBtn { background-color: #64748b; }
@@ -235,8 +293,9 @@
 </head>
 <body>
 
-<div class="container">
+<div id="mainContainer" class="container">
     
+    <!-- VIEW 1: SETUP WINDOW -->
     <div id="setupView" class="app-view active">
         <h1>Chinese Rhythm Sync</h1>
         
@@ -264,20 +323,36 @@
         </div>
     </div>
 
+    <!-- VIEW 2: STANDARD FOCUS MODE -->
     <div id="focusView" class="app-view">
         <h1>Focus Presentation Mode</h1>
         
         <div id="focusBox" class="focus-box">ーー</div>
 
         <label for="notesArea">Study Notes & Pinyin Window:</label>
-        <textarea id="notesArea" class="notes-window" placeholder="Type structural notes, translations or custom feedback details here... (Autosaves)"></textarea>
+        <textarea id="notesArea" class="notes-window" placeholder="Type structural notes, translations or custom feedback details here..."></textarea>
 
         <div class="controls-container">
+            <button id="toImmersiveViewBtn">Go Immersive Fullscreen Mode</button>
             <div class="grid-buttons">
                 <button id="focusPlayBtn">Play Rhythm</button>
                 <button id="toSetupViewBtn">← Back to Setup</button>
             </div>
-            <div id="statusFocus" class="status-text">Ready to run script.</div>
+            <div id="statusFocus" class="status-text">Ready.</div>
+        </div>
+    </div>
+
+    <!-- VIEW 3: IMMERSIVE FULLSCREEN MODE -->
+    <div id="immersiveView" class="app-view">
+        <!-- Faint Top Navigation Header Links -->
+        <div class="immersive-top-nav">
+            <button id="immToFocusBtn" class="faint-nav-btn">← Focus Mode</button>
+            <button id="immToSetupBtn" class="faint-nav-btn">Setup Page ➔</button>
+        </div>
+
+        <!-- Giant Tap Trigger Area Screen Overlay -->
+        <div id="fullscreenTapArena" class="fullscreen-tap-arena">
+            <div id="giantDisplayText" class="giant-display-text">TAP TO START</div>
         </div>
     </div>
 
@@ -293,9 +368,11 @@
     let startTime = 0;
     let playbackTimeoutIds = [];
 
-    // DOM Selector Hub
+    // Selectors Hub
+    const mainContainer = document.getElementById('mainContainer');
     const setupView = document.getElementById('setupView');
     const focusView = document.getElementById('focusView');
+    const immersiveView = document.getElementById('immersiveView');
     
     const sentenceInput = document.getElementById('sentenceInput');
     const sentencePreview = document.getElementById('sentencePreview');
@@ -305,16 +382,21 @@
     const playBtn = document.getElementById('playBtn');
     const retryBtn = document.getElementById('retryBtn');
     const toFocusViewBtn = document.getElementById('toFocusViewBtn');
+    const toImmersiveViewBtn = document.getElementById('toImmersiveViewBtn');
     
     const focusBox = document.getElementById('focusBox');
     const focusPlayBtn = document.getElementById('focusPlayBtn');
     const toSetupViewBtn = document.getElementById('toSetupViewBtn');
     
+    const fullscreenTapArena = document.getElementById('fullscreenTapArena');
+    const giantDisplayText = document.getElementById('giantDisplayText');
+    const immToFocusBtn = document.getElementById('immToFocusBtn');
+    const immToSetupBtn = document.getElementById('immToSetupBtn');
+    
     const tapZone = document.getElementById('tapZone');
     const statusSetup = document.getElementById('statusSetup');
     const statusFocus = document.getElementById('statusFocus');
 
-    // Parse sentence data structures
     function renderSentencePreview() {
         const text = sentenceInput.value.trim();
         words = text.split(/\s+/).filter(w => w !== "");
@@ -335,7 +417,7 @@
         document.querySelectorAll('.preview-word').forEach(span => span.classList.remove('active'));
     }
 
-    // Arm System For Recording Action
+    // Arm Recording
     recordBtn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         renderSentencePreview();
@@ -358,7 +440,7 @@
         statusSetup.textContent = "Timer initiates automatically at first impact.";
     });
 
-    // Primary Touch Panel Metrics Engine
+    // Recording Tap Capture Area
     tapZone.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         if (!isArmed && !isRecording) return;
@@ -389,7 +471,6 @@
                 tapZone.textContent = `TAP NOW for: ${words[currentIdx]}`;
                 statusSetup.textContent = `Logged ${currentIdx} / ${words.length}`;
             } else {
-                // Auto-concludes automatically when hitting the index threshold limit
                 finishRecording();
             }
         }
@@ -406,24 +487,23 @@
             toFocusViewBtn.disabled = false;
             localStorage.setItem('savedTimestamps', JSON.stringify(recordedTimestamps));
             tapZone.textContent = "Perfect! Rhythm Saved.";
-            statusSetup.textContent = "Ready. Tap 'Go to Focus Mode' to study.";
+            statusSetup.textContent = "Ready. Move views to study.";
         }
     }
 
-    // Shared Execution Engine for Playback
+    // Centered Playback Handler Engine
     function executePlayback(displayTarget, statusTarget) {
         clearPlayback();
-        statusTarget.textContent = "Playing rhythm structure...";
+        if(statusTarget) statusTarget.textContent = "Playing rhythm structure...";
         displayTarget.textContent = "ーー";
 
         recordedTimestamps.forEach((stamp, index) => {
             let id = setTimeout(() => {
                 displayTarget.textContent = stamp.word;
                 
-                // Clear state slightly past completion run
                 if (index === recordedTimestamps.length - 1) {
                     let finishId = setTimeout(() => {
-                        statusTarget.textContent = "Playback complete.";
+                        if(statusTarget) statusTarget.textContent = "Playback complete.";
                     }, 800);
                     playbackTimeoutIds.push(finishId);
                 }
@@ -435,7 +515,7 @@
 
     playBtn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
-        executePlayback(document.getElementById('focusBox'), statusSetup); // Temporarily flashes focus text space for confirmation checks
+        executePlayback(focusBox, statusSetup); 
     });
 
     focusPlayBtn.addEventListener('pointerdown', (e) => {
@@ -443,30 +523,69 @@
         executePlayback(focusBox, statusFocus);
     });
 
-    // View Navigation Switches
+    // Fullscreen Immersive Screen Reset Tap Trigger
+    fullscreenTapArena.addEventListener('pointerdown', (e) => {
+        // Prevent trigger activation if user accidentally clicks faint navigation text links instead
+        if (e.target.classList.contains('faint-nav-btn')) return;
+        e.preventDefault();
+        executePlayback(giantDisplayText, null);
+    });
+
+    // Navigation Matrix Switches
     toFocusViewBtn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         clearPlayback();
+        mainContainer.classList.remove('immersive-active');
         setupView.classList.remove('active');
+        immersiveView.classList.remove('active');
         focusView.classList.add('active');
         focusBox.textContent = "ーー";
-        statusFocus.textContent = "Ready to display rhythm loop.";
     });
 
     toSetupViewBtn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         clearPlayback();
+        mainContainer.classList.remove('immersive-active');
         focusView.classList.remove('active');
+        immersiveView.classList.remove('active');
         setupView.classList.add('active');
         clearVisualHighlights();
     });
 
-    // Storage Saving for Notes Window
+    toImmersiveViewBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        clearPlayback();
+        focusView.classList.remove('active');
+        setupView.classList.remove('active');
+        
+        mainContainer.classList.add('immersive-active');
+        immersiveView.classList.add('active');
+        giantDisplayText.textContent = "TAP ANYWHERE";
+    });
+
+    // Connect top navigation inside immersive screen overlay layout mapping
+    immToFocusBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        clearPlayback();
+        mainContainer.classList.remove('immersive-active');
+        immersiveView.classList.remove('active');
+        focusView.classList.add('active');
+        focusBox.textContent = "ーー";
+    });
+
+    immToSetupBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        clearPlayback();
+        mainContainer.classList.remove('immersive-active');
+        immersiveView.classList.remove('active');
+        setupView.classList.add('active');
+        clearVisualHighlights();
+    });
+
     notesArea.addEventListener('input', () => {
         localStorage.setItem('savedNotes', notesArea.value);
     });
 
-    // Wipe states
     retryBtn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         clearPlayback();
@@ -493,7 +612,6 @@
 
     sentenceInput.addEventListener('input', renderSentencePreview);
 
-    // Initialization Sequence
     window.addEventListener('DOMContentLoaded', () => {
         const storedSentence = localStorage.getItem('savedSentence');
         const storedTimestamps = localStorage.getItem('savedTimestamps');
@@ -509,7 +627,7 @@
             if (recordedTimestamps.length > 0) {
                 playBtn.disabled = false;
                 toFocusViewBtn.disabled = false;
-                statusSetup.textContent = "Loaded last profile rhythm configurations safely.";
+                statusSetup.textContent = "Loaded last profile configurations safely.";
             }
         }
     });
