@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Chinese Rhythm Sync</title>
     <style>
-        /* S22 Ultra Mobile-First Optimizations */
+        /* Base Dark Mode Settings for Samsung S22 Ultra */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: #0f172a;
@@ -17,7 +17,7 @@
             margin: 0;
             min-height: 100vh;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent; /* Removes touch flash delay on mobile Chrome */
+            -webkit-tap-highlight-color: transparent;
         }
 
         .container {
@@ -30,7 +30,7 @@
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            flex-grow: 1;
+            min-height: calc(100vh - 32px);
         }
 
         h1 {
@@ -38,6 +38,17 @@
             text-align: center;
             margin: 0 0 15px 0;
             color: #f1f5f9;
+        }
+
+        /* View Switching Logic */
+        .app-view {
+            display: none;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .app-view.active {
+            display: flex;
         }
 
         .input-group {
@@ -68,7 +79,7 @@
             border-color: #38bdf8;
         }
 
-        /* Full Sentence Preview with Dim Text */
+        /* Setup View Sentence Preview styling */
         .sentence-preview {
             background-color: #0f172a;
             border: 1px solid #334155;
@@ -86,16 +97,16 @@
         .preview-word {
             font-size: 1.4rem;
             font-weight: bold;
-            color: #475569; /* Dim color by default */
-            transition: color 0.05s ease, text-shadow 0.05s ease;
+            color: #475569;
+            transition: color 0.05s ease;
         }
 
         .preview-word.active {
-            color: #38bdf8; /* Highlighted color */
+            color: #38bdf8;
             text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
         }
 
-        /* The Interactive Tap Area */
+        /* Tap Capture Area */
         .tap-zone {
             width: 100%;
             flex-grow: 1;
@@ -115,7 +126,7 @@
             text-align: center;
             padding: 15px;
             box-sizing: border-box;
-            touch-action: manipulation; /* Optimizes for mobile tap response speeds */
+            touch-action: manipulation;
         }
 
         .tap-zone:active {
@@ -123,7 +134,49 @@
             border-color: #64748b;
         }
 
-        /* Bottom Controls Layout for Thumb Reach */
+        /* VIEW 2: Focus View UI Layout */
+        .focus-box {
+            width: 100%;
+            height: 180px;
+            background: #0f172a;
+            color: #38bdf8;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4.2rem; /* Massive typography layout */
+            font-weight: bold;
+            padding: 15px;
+            text-align: center;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+
+        /* Notes Window Textarea Component */
+        .notes-window {
+            width: 100%;
+            flex-grow: 1;
+            min-height: 140px;
+            background-color: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            padding: 12px;
+            color: #e2e8f0;
+            font-size: 1rem;
+            line-height: 1.5;
+            resize: none;
+            box-sizing: border-box;
+            outline: none;
+            margin-bottom: 15px;
+        }
+
+        .notes-window:focus {
+            border-color: #38bdf8;
+        }
+
+        /* Navigation & Dashboard Actions Grouping */
         .controls-container {
             margin-top: auto;
             display: flex;
@@ -157,19 +210,20 @@
         #recordBtn.ready-to-tap { background-color: #f59e0b; animation: pulse 1.5s infinite; }
         #recordBtn.recording { background-color: #b91c1c; }
         
-        #concludeBtn { background-color: #10b981; }
-        #concludeBtn:disabled { background-color: #1e293b; border: 1px solid #334155; color: #475569; }
-
-        #playBtn { background-color: #0ea5e9; }
+        #playBtn, #focusPlayBtn { background-color: #0ea5e9; }
         #playBtn:disabled { background-color: #334155; color: #64748b; cursor: not-allowed; }
 
-        #retryBtn { background-color: #64748b; }
+        #toFocusViewBtn { background-color: #8b5cf6; } /* Purple navigation asset */
+        #toFocusViewBtn:disabled { background-color: #334155; color: #64748b; cursor: not-allowed; }
+        
+        #toSetupViewBtn { background-color: #64748b; }
+        #retryBtn { background-color: #475569; }
 
         .status-text {
             text-align: center;
             font-size: 0.85rem;
             color: #64748b;
-            margin-top: 8px;
+            margin-top: 4px;
         }
 
         @keyframes pulse {
@@ -182,34 +236,55 @@
 <body>
 
 <div class="container">
-    <h1>Chinese Rhythm Sync</h1>
-
-    <div class="input-group">
-        <label for="sentenceInput">Enter words separated by spaces:</label>
-        <input type="text" id="sentenceInput" value="父母 给予 我 极大的 支持。">
-    </div>
-
-    <div id="sentencePreview" class="sentence-preview"></div>
-
-    <div id="tapZone" class="tap-zone">
-        Tap here to set the rhythm!
-    </div>
-
-    <div class="controls-container">
-        <div class="grid-buttons">
-            <button id="recordBtn">Start Recording</button>
-            <button id="concludeBtn" disabled>Conclude Run</button>
+    
+    <div id="setupView" class="app-view active">
+        <h1>Chinese Rhythm Sync</h1>
+        
+        <div class="input-group">
+            <label for="sentenceInput">Enter words separated by spaces:</label>
+            <input type="text" id="sentenceInput" value="父母 给予 我 极大的 支持。">
         </div>
-        <div class="grid-buttons">
-            <button id="playBtn" disabled>Play Rhythm</button>
-            <button id="retryBtn">Retry / Reset</button>
+
+        <div id="sentencePreview" class="sentence-preview"></div>
+
+        <div id="tapZone" class="tap-zone">
+            Tap here to set the rhythm!
         </div>
-        <div id="status" class="status-text">Ready.</div>
+
+        <div class="controls-container">
+            <div class="grid-buttons">
+                <button id="recordBtn">Start Recording</button>
+                <button id="toFocusViewBtn" disabled>Go to Focus Mode →</button>
+            </div>
+            <div class="grid-buttons">
+                <button id="playBtn" disabled>Test Rhythm</button>
+                <button id="retryBtn">Clear / Reset</button>
+            </div>
+            <div id="statusSetup" class="status-text">Ready.</div>
+        </div>
     </div>
+
+    <div id="focusView" class="app-view">
+        <h1>Focus Presentation Mode</h1>
+        
+        <div id="focusBox" class="focus-box">ーー</div>
+
+        <label for="notesArea">Study Notes & Pinyin Window:</label>
+        <textarea id="notesArea" class="notes-window" placeholder="Type structural notes, translations or custom feedback details here... (Autosaves)"></textarea>
+
+        <div class="controls-container">
+            <div class="grid-buttons">
+                <button id="focusPlayBtn">Play Rhythm</button>
+                <button id="toSetupViewBtn">← Back to Setup</button>
+            </div>
+            <div id="statusFocus" class="status-text">Ready to run script.</div>
+        </div>
+    </div>
+
 </div>
 
 <script>
-    // App State Configuration
+    // System Configurations
     let words = [];
     let recordedTimestamps = [];
     let isArmed = false; 
@@ -218,17 +293,28 @@
     let startTime = 0;
     let playbackTimeoutIds = [];
 
-    // Elements
+    // DOM Selector Hub
+    const setupView = document.getElementById('setupView');
+    const focusView = document.getElementById('focusView');
+    
     const sentenceInput = document.getElementById('sentenceInput');
     const sentencePreview = document.getElementById('sentencePreview');
+    const notesArea = document.getElementById('notesArea');
+    
     const recordBtn = document.getElementById('recordBtn');
-    const concludeBtn = document.getElementById('concludeBtn');
     const playBtn = document.getElementById('playBtn');
     const retryBtn = document.getElementById('retryBtn');
+    const toFocusViewBtn = document.getElementById('toFocusViewBtn');
+    
+    const focusBox = document.getElementById('focusBox');
+    const focusPlayBtn = document.getElementById('focusPlayBtn');
+    const toSetupViewBtn = document.getElementById('toSetupViewBtn');
+    
     const tapZone = document.getElementById('tapZone');
-    const statusText = document.getElementById('status');
+    const statusSetup = document.getElementById('statusSetup');
+    const statusFocus = document.getElementById('statusFocus');
 
-    // Parse text field and build the dim UI overlay elements
+    // Parse sentence data structures
     function renderSentencePreview() {
         const text = sentenceInput.value.trim();
         words = text.split(/\s+/).filter(w => w !== "");
@@ -242,18 +328,14 @@
             sentencePreview.appendChild(span);
         });
 
-        // Save layout configuration to local storage
         localStorage.setItem('savedSentence', text);
     }
 
-    // Reset active visual states back to default dim values
     function clearVisualHighlights() {
-        document.querySelectorAll('.preview-word').forEach(span => {
-            span.classList.remove('active');
-        });
+        document.querySelectorAll('.preview-word').forEach(span => span.classList.remove('active'));
     }
 
-    // Step 1: Arm the recording system
+    // Arm System For Recording Action
     recordBtn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         renderSentencePreview();
@@ -269,20 +351,18 @@
 
         recordBtn.textContent = "Waiting for 1st Tap...";
         recordBtn.className = "ready-to-tap";
-        concludeBtn.disabled = false;
         playBtn.disabled = true;
+        toFocusViewBtn.disabled = true;
 
-        tapZone.textContent = `Tap to begin! First word: ${words[0]}`;
-        statusText.textContent = "Timer starts structural tracking on your very first tap.";
+        tapZone.textContent = `Tap to begin! First: ${words[0]}`;
+        statusSetup.textContent = "Timer initiates automatically at first impact.";
     });
 
-    // Handle Tap interaction (using pointerdown for instant mobile responsiveness)
+    // Primary Touch Panel Metrics Engine
     tapZone.addEventListener('pointerdown', (e) => {
         e.preventDefault();
-        
         if (!isArmed && !isRecording) return;
 
-        // Dynamic Start Logic: Start tracking timing now on the first tap
         if (isArmed && !isRecording) {
             isArmed = false;
             isRecording = true;
@@ -294,13 +374,11 @@
         const currentTapTime = performance.now() - startTime;
 
         if (currentIdx < words.length) {
-            // Document time offset
             recordedTimestamps.push({
                 word: words[currentIdx],
                 timeOffset: currentTapTime
             });
 
-            // Handle lighting up the preview display
             clearVisualHighlights();
             const activeSpan = document.getElementById(`word-${currentIdx}`);
             if (activeSpan) activeSpan.classList.add('active');
@@ -309,19 +387,11 @@
 
             if (currentIdx < words.length) {
                 tapZone.textContent = `TAP NOW for: ${words[currentIdx]}`;
-                statusText.textContent = `Tapped ${currentIdx} / ${words.length}`;
+                statusSetup.textContent = `Logged ${currentIdx} / ${words.length}`;
             } else {
-                // Autocomplete once all array structures are successfully filled
+                // Auto-concludes automatically when hitting the index threshold limit
                 finishRecording();
             }
-        }
-    });
-
-    // Step 2: Finalize rhythm metrics
-    concludeBtn.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
-        if (isRecording || isArmed) {
-            finishRecording();
         }
     });
 
@@ -330,50 +400,75 @@
         isRecording = false;
         recordBtn.textContent = "Start Recording";
         recordBtn.className = "";
-        concludeBtn.disabled = true;
         
         if (recordedTimestamps.length > 0) {
             playBtn.disabled = false;
+            toFocusViewBtn.disabled = false;
             localStorage.setItem('savedTimestamps', JSON.stringify(recordedTimestamps));
-            tapZone.textContent = "Rhythm Saved to Storage!";
-            statusText.textContent = "Recording locked. Ready to play back.";
-        } else {
-            tapZone.textContent = "No taps registered.";
-            statusText.textContent = "Ready.";
+            tapZone.textContent = "Perfect! Rhythm Saved.";
+            statusSetup.textContent = "Ready. Tap 'Go to Focus Mode' to study.";
         }
     }
 
-    // Direct Manual Playback Engine
-    playBtn.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
-        if (recordedTimestamps.length === 0) return;
-
+    // Shared Execution Engine for Playback
+    function executePlayback(displayTarget, statusTarget) {
         clearPlayback();
-        clearVisualHighlights();
-        statusText.textContent = "Playing match layout...";
+        statusTarget.textContent = "Playing rhythm structure...";
+        displayTarget.textContent = "ーー";
 
         recordedTimestamps.forEach((stamp, index) => {
             let id = setTimeout(() => {
-                clearVisualHighlights();
-                const currentSpan = document.getElementById(`word-${index}`);
-                if (currentSpan) currentSpan.classList.add('active');
+                displayTarget.textContent = stamp.word;
                 
-                // Clear the final word highlight slightly after completion
+                // Clear state slightly past completion run
                 if (index === recordedTimestamps.length - 1) {
-                    let endId = setTimeout(() => {
-                        clearVisualHighlights();
-                        statusText.textContent = "Playback Finished.";
+                    let finishId = setTimeout(() => {
+                        statusTarget.textContent = "Playback complete.";
                     }, 800);
-                    playbackTimeoutIds.push(endId);
+                    playbackTimeoutIds.push(finishId);
                 }
             }, stamp.timeOffset);
 
             playbackTimeoutIds.push(id);
         });
+    }
+
+    playBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        executePlayback(document.getElementById('focusBox'), statusSetup); // Temporarily flashes focus text space for confirmation checks
     });
 
-    // Reset UI state cleanly
-    function resetApp() {
+    focusPlayBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        executePlayback(focusBox, statusFocus);
+    });
+
+    // View Navigation Switches
+    toFocusViewBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        clearPlayback();
+        setupView.classList.remove('active');
+        focusView.classList.add('active');
+        focusBox.textContent = "ーー";
+        statusFocus.textContent = "Ready to display rhythm loop.";
+    });
+
+    toSetupViewBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        clearPlayback();
+        focusView.classList.remove('active');
+        setupView.classList.add('active');
+        clearVisualHighlights();
+    });
+
+    // Storage Saving for Notes Window
+    notesArea.addEventListener('input', () => {
+        localStorage.setItem('savedNotes', notesArea.value);
+    });
+
+    // Wipe states
+    retryBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
         clearPlayback();
         clearVisualHighlights();
         isArmed = false;
@@ -383,17 +478,12 @@
         
         recordBtn.textContent = "Start Recording";
         recordBtn.className = "";
-        concludeBtn.disabled = true;
         playBtn.disabled = true;
+        toFocusViewBtn.disabled = true;
         
         tapZone.textContent = "Tap here to set the rhythm!";
-        statusText.textContent = "Reset complete.";
+        statusSetup.textContent = "Reset tracking values complete.";
         renderSentencePreview();
-    }
-
-    retryBtn.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
-        resetApp();
     });
 
     function clearPlayback() {
@@ -401,17 +491,16 @@
         playbackTimeoutIds = [];
     }
 
-    // Event listener to render layout instantly when user changes text value
     sentenceInput.addEventListener('input', renderSentencePreview);
 
-    // Initialization Sequence (Pulls data from memory on browser boot)
+    // Initialization Sequence
     window.addEventListener('DOMContentLoaded', () => {
         const storedSentence = localStorage.getItem('savedSentence');
         const storedTimestamps = localStorage.getItem('savedTimestamps');
+        const savedNotes = localStorage.getItem('savedNotes');
 
-        if (storedSentence) {
-            sentenceInput.value = storedSentence;
-        }
+        if (storedSentence) sentenceInput.value = storedSentence;
+        if (savedNotes) notesArea.value = savedNotes;
         
         renderSentencePreview();
 
@@ -419,7 +508,8 @@
             recordedTimestamps = JSON.parse(storedTimestamps);
             if (recordedTimestamps.length > 0) {
                 playBtn.disabled = false;
-                statusText.textContent = "Loaded last saved rhythm from memory.";
+                toFocusViewBtn.disabled = false;
+                statusSetup.textContent = "Loaded last profile rhythm configurations safely.";
             }
         }
     });
