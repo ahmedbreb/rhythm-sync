@@ -86,7 +86,7 @@
 
         input[type="text"] {
             width: 100%;
-            padding: 12px 85px 12px 12px; /* Added right padding to prevent text overlapping buttons */
+            padding: 12px 85px 12px 12px;
             background-color: #0f172a;
             border: 2px solid #334155;
             border-radius: 8px;
@@ -143,6 +143,9 @@
             font-weight: bold;
             color: #475569;
             transition: color 0.05s ease;
+            white-space: pre-wrap;
+            text-align: center;
+            line-height: 1.2;
         }
 
         .preview-word.active {
@@ -170,6 +173,7 @@
             padding: 15px;
             box-sizing: border-box;
             touch-action: manipulation;
+            white-space: pre-wrap;
         }
 
         .tap-zone:active {
@@ -187,13 +191,16 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 3.8rem;
+            font-size: 3rem;
             font-weight: bold;
             padding: 15px;
             text-align: center;
             box-sizing: border-box;
             margin-bottom: 15px;
             text-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+            white-space: pre-wrap;
+            line-height: 1.2;
+            overflow: hidden;
         }
 
         .notes-window {
@@ -253,7 +260,7 @@
             top: 0;
             left: 0;
             box-sizing: border-box;
-            padding: 30px;
+            padding: 40px;
             touch-action: manipulation;
         }
 
@@ -264,6 +271,10 @@
             text-align: center;
             text-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
             pointer-events: none;
+            white-space: pre-wrap;
+            line-height: 1.15;
+            width: 100%;
+            word-wrap: break-word;
         }
 
         .controls-container {
@@ -335,7 +346,7 @@
                 <label for="sentenceInput">Enter words separated by spaces:</label>
             </div>
             <div class="input-wrapper">
-                <input type="text" id="sentenceInput" value="父母 给予 我 极大的 支持。">
+                <input type="text" id="sentenceInput" value="他们的 花 不像 在-中国-那样, 养 在-屋子-里, 他们 是 把花 都 栽种 在-临街-窗户的 外面。">
                 <div class="inline-actions">
                     <button id="clearInputBtn" class="btn-inline" title="Clear Text">✕</button>
                     <button id="pasteInputBtn" class="btn-inline" title="Paste from Clipboard">📋</button>
@@ -436,6 +447,11 @@
     const statusSetup = document.getElementById('statusSetup');
     const statusFocus = document.getElementById('statusFocus');
 
+    // Formats a hyphenated word into multiline representation for cleaner preview/playback displays
+    function formatWordDisplay(wordString) {
+        return wordString.replace(/-/g, '\n');
+    }
+
     function renderSentencePreview() {
         const text = sentenceInput.value.trim();
         words = text.split(/\s+/).filter(w => w !== "");
@@ -445,7 +461,8 @@
             const span = document.createElement('span');
             span.className = 'preview-word';
             span.id = `word-${index}`;
-            span.textContent = word;
+            // Convert hyphens to real breaks visually in preview block
+            span.textContent = formatWordDisplay(word);
             sentencePreview.appendChild(span);
         });
 
@@ -454,6 +471,50 @@
 
     function clearVisualHighlights() {
         document.querySelectorAll('.preview-word').forEach(span => span.classList.remove('active'));
+    }
+
+    // Dynamic scale font size engine down to cleanly fit single line thresholds
+    function updateTextWithAutoFit(element, basicText, targetMaxFontSizeRem) {
+        element.style.fontSize = targetMaxFontSizeRem + "rem";
+        element.textContent = basicText;
+
+        // Break text lines into array elements to locate maximum horizontal text segments
+        const lines = basicText.split('\n');
+        
+        // Setup hidden measurement sandbox elements to avoid DOM paint stuttering
+        const ruler = document.createElement('span');
+        ruler.style.visibility = 'hidden';
+        ruler.style.position = 'absolute';
+        ruler.style.whiteSpace = 'nowrap';
+        ruler.style.fontFamily = window.getComputedStyle(element).fontFamily;
+        ruler.style.fontWeight = window.getComputedStyle(element).fontWeight;
+        document.body.appendChild(ruler);
+
+        let currentSizeRem = targetMaxFontSizeRem;
+        const paddingBuffer = 45; // Match structural screen boundary requirements
+        const maxAllowedWidth = element.clientWidth - paddingBuffer;
+
+        // Loop to dynamically step down sizes until all target lines sit clean inside bounds
+        while (currentSizeRem > 1.2) {
+            ruler.style.fontSize = currentSizeRem + "rem";
+            let lineOverflowDetected = false;
+
+            for (let i = 0; i < lines.length; i++) {
+                ruler.textContent = lines[i];
+                if (ruler.offsetWidth > maxAllowedWidth) {
+                    lineOverflowDetected = true;
+                    break;
+                }
+            }
+
+            if (!lineOverflowDetected) {
+                break; // Fits completely without truncation or wrapping bugs
+            }
+            currentSizeRem -= 0.15;
+        }
+
+        document.body.removeChild(ruler);
+        element.style.fontSize = currentSizeRem + "rem";
     }
 
     // New Input Quick Actions Logic
@@ -467,7 +528,6 @@
     pasteInputBtn.addEventListener('pointerdown', async (e) => {
         e.preventDefault();
         try {
-            // Uses standard Web Clipboard API natively handled by Chrome Mobile
             const text = await navigator.clipboard.readText();
             sentenceInput.value = text;
             renderSentencePreview();
@@ -497,7 +557,7 @@
         playBtn.disabled = true;
         toFocusViewBtn.disabled = true;
 
-        tapZone.textContent = `Tap to begin! First: ${words[0]}`;
+        tapZone.textContent = `Tap to begin!\nFirst: ${formatWordDisplay(words[0])}`;
         statusSetup.textContent = "Timer initiates automatically at first impact.";
     });
 
@@ -529,7 +589,7 @@
             currentIdx++;
 
             if (currentIdx < words.length) {
-                tapZone.textContent = `TAP NOW for: ${words[currentIdx]}`;
+                tapZone.textContent = `TAP NOW for:\n${formatWordDisplay(words[currentIdx])}`;
                 statusSetup.textContent = `Logged ${currentIdx} / ${words.length}`;
             } else {
                 finishRecording();
@@ -553,14 +613,19 @@
     }
 
     // Centered Playback Handler Engine
-    function executePlayback(displayTarget, statusTarget) {
+    function executePlayback(displayTarget, statusTarget, baseMaxFontRem) {
         clearPlayback();
         if(statusTarget) statusTarget.textContent = "Playing rhythm structure...";
+        
+        displayTarget.style.fontSize = baseMaxFontRem + "rem";
         displayTarget.textContent = "ーー";
 
         recordedTimestamps.forEach((stamp, index) => {
             let id = setTimeout(() => {
-                displayTarget.textContent = stamp.word;
+                const multiLineText = formatWordDisplay(stamp.word);
+                
+                // Route through our safety fitting calculator engine to guarantee no broken line wraps
+                updateTextWithAutoFit(displayTarget, multiLineText, baseMaxFontRem);
                 
                 if (index === recordedTimestamps.length - 1) {
                     let finishId = setTimeout(() => {
@@ -576,18 +641,18 @@
 
     playBtn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
-        executePlayback(focusBox, statusSetup); 
+        executePlayback(focusBox, statusSetup, 3.0); 
     });
 
     focusPlayBtn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
-        executePlayback(focusBox, statusFocus);
+        executePlayback(focusBox, statusFocus, 3.0);
     });
 
     fullscreenTapArena.addEventListener('pointerdown', (e) => {
         if (e.target.classList.contains('faint-nav-btn')) return;
         e.preventDefault();
-        executePlayback(giantDisplayText, null);
+        executePlayback(giantDisplayText, null, 5.5);
     });
 
     // Navigation Matrix Switches
@@ -598,6 +663,7 @@
         setupView.classList.remove('active');
         immersiveView.classList.remove('active');
         focusView.classList.add('active');
+        focusBox.style.fontSize = "3rem";
         focusBox.textContent = "ーー";
     });
 
@@ -619,6 +685,7 @@
         
         mainContainer.classList.add('immersive-active');
         immersiveView.classList.add('active');
+        giantDisplayText.style.fontSize = "5.5rem";
         giantDisplayText.textContent = "TAP ANYWHERE";
     });
 
@@ -628,6 +695,7 @@
         mainContainer.classList.remove('immersive-active');
         immersiveView.classList.remove('active');
         focusView.classList.add('active');
+        focusBox.style.fontSize = "3rem";
         focusBox.textContent = "ーー";
     });
 
