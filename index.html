@@ -13,7 +13,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 16px;
+            padding: 12px; /* Slightly reduced to gain vertical space */
             margin: 0;
             min-height: 100vh;
             box-sizing: border-box;
@@ -24,14 +24,14 @@
             max-width: 500px;
             width: 100%;
             background: #1e293b;
-            padding: 20px;
+            padding: 16px;
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.4);
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            min-height: calc(100vh - 32px);
-            transition: all 0.2s ease;
+            height: calc(100vh - 24px); /* Pinned to exact viewport height */
+            overflow: hidden; /* Prevents main view container from breaking layout */
         }
 
         .container.immersive-active {
@@ -39,14 +39,14 @@
             background: #0f172a;
             padding: 10px;
             box-shadow: none;
-            min-height: 100vh;
+            height: 100vh;
             border-radius: 0;
         }
 
         h1 {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             text-align: center;
-            margin: 0 0 15px 0;
+            margin: 0 0 10px 0;
             color: #f1f5f9;
         }
 
@@ -54,27 +54,27 @@
             display: none;
             flex-direction: column;
             flex-grow: 1;
+            overflow: hidden; /* Lock individual view containers */
         }
 
         .app-view.active {
             display: flex;
         }
 
-        /* Upgraded Quick Action Input Container */
         .input-group {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .input-label-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         label {
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #94a3b8;
         }
 
@@ -86,11 +86,11 @@
 
         input[type="text"] {
             width: 100%;
-            padding: 12px 85px 12px 12px;
+            padding: 10px 85px 10px 12px;
             background-color: #0f172a;
             border: 2px solid #334155;
             border-radius: 8px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: #f8fafc;
             box-sizing: border-box;
             outline: none;
@@ -112,8 +112,8 @@
             background-color: #334155;
             color: #94a3b8;
             border: none;
-            padding: 8px 10px;
-            font-size: 0.85rem;
+            padding: 6px 10px;
+            font-size: 0.8rem;
             border-radius: 6px;
             font-weight: bold;
             min-width: 34px;
@@ -124,53 +124,62 @@
             color: #f8fafc;
         }
 
+        /* Fixed-height and Scrollable Preview Area to prevent layout push */
         .sentence-preview {
             background-color: #0f172a;
             border: 1px solid #334155;
             border-radius: 8px;
             padding: 12px;
-            margin-bottom: 15px;
-            min-height: 50px;
+            margin-bottom: 12px;
+            height: 110px; /* Locked height */
+            max-height: 110px;
+            overflow-y: auto; /* Scroll internally when text scales high */
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             justify-content: center;
-            align-items: center;
+            align-content: flex-start; /* Aligns content to top during scroll operations */
+            scroll-behavior: smooth;
         }
 
         .preview-word {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: #475569;
-            transition: color 0.05s ease;
+            transition: all 0.15s ease;
             white-space: pre-wrap;
             text-align: center;
             line-height: 1.2;
+            padding: 2px 4px;
+            border-radius: 4px;
         }
 
         .preview-word.active {
             color: #38bdf8;
+            background-color: rgba(56, 189, 248, 0.1);
             text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+            transform: scale(1.05);
         }
 
+        /* Scaled to balanced proportions */
         .tap-zone {
             width: 100%;
             flex-grow: 1;
-            min-height: 180px;
+            min-height: 100px;
             background-color: #1e293b;
             border: 3px dashed #475569;
             border-radius: 12px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
             color: #94a3b8;
             cursor: pointer;
             user-select: none;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
             text-align: center;
-            padding: 15px;
+            padding: 10px;
             box-sizing: border-box;
             touch-action: manipulation;
             white-space: pre-wrap;
@@ -183,7 +192,7 @@
 
         .focus-box {
             width: 100%;
-            height: 180px;
+            height: 160px;
             background: #0f172a;
             color: #38bdf8;
             border: 2px solid #334155;
@@ -196,7 +205,7 @@
             padding: 15px;
             text-align: center;
             box-sizing: border-box;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             text-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
             white-space: pre-wrap;
             line-height: 1.2;
@@ -206,7 +215,7 @@
         .notes-window {
             width: 100%;
             flex-grow: 1;
-            min-height: 140px;
+            min-height: 100px;
             background-color: #0f172a;
             border: 2px solid #334155;
             border-radius: 8px;
@@ -217,7 +226,7 @@
             resize: none;
             box-sizing: border-box;
             outline: none;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .immersive-top-nav {
@@ -281,18 +290,18 @@
             margin-top: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         .grid-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 8px;
         }
 
         button:not(.btn-inline) {
-            padding: 15px 10px;
-            font-size: 0.95rem;
+            padding: 12px 10px; /* Reduced vertical button padding slightly */
+            font-size: 0.9rem;
             font-weight: bold;
             border: none;
             border-radius: 8px;
@@ -321,9 +330,9 @@
 
         .status-text {
             text-align: center;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #64748b;
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         @keyframes pulse {
@@ -346,7 +355,7 @@
                 <label for="sentenceInput">Enter words separated by spaces:</label>
             </div>
             <div class="input-wrapper">
-                <input type="text" id="sentenceInput" value="他们的 花 不像 在-中国-那样, 养 在-屋子-里, 他们 是 把花 都 栽种 在-临街-窗户的 外面。">
+                <input type="text" id="sentenceInput" value="坐-公共汽车-时 不再 无聊, 因为 可以 找-个-靠窗的-位置 欣赏 街道上的-广告; 在-人行道-上 郁闷地 等待 红绿灯-时, 可以 看看 人行道-附近的-各种-公益-广告; 公共汽车 换上了 新装, 吃的、 喝的、 玩的、 用的, 什么-都-有, 吸引着 人们的-眼球.">
                 <div class="inline-actions">
                     <button id="clearInputBtn" class="btn-inline" title="Clear Text">✕</button>
                     <button id="pasteInputBtn" class="btn-inline" title="Paste from Clipboard">📋</button>
@@ -447,7 +456,6 @@
     const statusSetup = document.getElementById('statusSetup');
     const statusFocus = document.getElementById('statusFocus');
 
-    // Formats a hyphenated word into multiline representation for cleaner preview/playback displays
     function formatWordDisplay(wordString) {
         return wordString.replace(/-/g, '\n');
     }
@@ -461,7 +469,6 @@
             const span = document.createElement('span');
             span.className = 'preview-word';
             span.id = `word-${index}`;
-            // Convert hyphens to real breaks visually in preview block
             span.textContent = formatWordDisplay(word);
             sentencePreview.appendChild(span);
         });
@@ -469,19 +476,32 @@
         localStorage.setItem('savedSentence', text);
     }
 
+    // Upgraded: Centers active elements within scroll viewport boundaries
+    function setActiveWordAndScroll(index) {
+        clearVisualHighlights();
+        const activeSpan = document.getElementById(`word-${index}`);
+        if (activeSpan) {
+            activeSpan.classList.add('active');
+            
+            // Calculates scroll offset position to keep the current word cleanly locked in view
+            const containerHeight = sentencePreview.clientHeight;
+            const elementTop = activeSpan.offsetTop;
+            const elementHeight = activeSpan.clientHeight;
+            
+            sentencePreview.scrollTop = elementTop - (containerHeight / 2) + (elementHeight / 2);
+        }
+    }
+
     function clearVisualHighlights() {
         document.querySelectorAll('.preview-word').forEach(span => span.classList.remove('active'));
     }
 
-    // Dynamic scale font size engine down to cleanly fit single line thresholds
     function updateTextWithAutoFit(element, basicText, targetMaxFontSizeRem) {
         element.style.fontSize = targetMaxFontSizeRem + "rem";
         element.textContent = basicText;
 
-        // Break text lines into array elements to locate maximum horizontal text segments
         const lines = basicText.split('\n');
         
-        // Setup hidden measurement sandbox elements to avoid DOM paint stuttering
         const ruler = document.createElement('span');
         ruler.style.visibility = 'hidden';
         ruler.style.position = 'absolute';
@@ -491,10 +511,9 @@
         document.body.appendChild(ruler);
 
         let currentSizeRem = targetMaxFontSizeRem;
-        const paddingBuffer = 45; // Match structural screen boundary requirements
+        const paddingBuffer = 45; 
         const maxAllowedWidth = element.clientWidth - paddingBuffer;
 
-        // Loop to dynamically step down sizes until all target lines sit clean inside bounds
         while (currentSizeRem > 1.2) {
             ruler.style.fontSize = currentSizeRem + "rem";
             let lineOverflowDetected = false;
@@ -508,7 +527,7 @@
             }
 
             if (!lineOverflowDetected) {
-                break; // Fits completely without truncation or wrapping bugs
+                break; 
             }
             currentSizeRem -= 0.15;
         }
@@ -517,7 +536,6 @@
         element.style.fontSize = currentSizeRem + "rem";
     }
 
-    // New Input Quick Actions Logic
     clearInputBtn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         sentenceInput.value = '';
@@ -531,6 +549,7 @@
             const text = await navigator.clipboard.readText();
             sentenceInput.value = text;
             renderSentencePreview();
+            sentencePreview.scrollTop = 0; // Reset scroll view tracking
             statusSetup.textContent = "Text pasted from clipboard successfully!";
         } catch (err) {
             statusSetup.textContent = "Could not paste text automatically. Please long-press inside the box instead.";
@@ -538,7 +557,6 @@
         }
     });
 
-    // Arm Recording
     recordBtn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         renderSentencePreview();
@@ -546,6 +564,7 @@
 
         clearPlayback();
         clearVisualHighlights();
+        sentencePreview.scrollTop = 0;
 
         isArmed = true;
         isRecording = false;
@@ -561,7 +580,6 @@
         statusSetup.textContent = "Timer initiates automatically at first impact.";
     });
 
-    // Recording Tap Capture Area
     tapZone.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         if (!isArmed && !isRecording) return;
@@ -582,10 +600,7 @@
                 timeOffset: currentTapTime
             });
 
-            clearVisualHighlights();
-            const activeSpan = document.getElementById(`word-${currentIdx}`);
-            if (activeSpan) activeSpan.classList.add('active');
-
+            setActiveWordAndScroll(currentIdx);
             currentIdx++;
 
             if (currentIdx < words.length) {
@@ -612,20 +627,22 @@
         }
     }
 
-    // Centered Playback Handler Engine
-    function executePlayback(displayTarget, statusTarget, baseMaxFontRem) {
+    function executePlayback(displayTarget, statusTarget, baseMaxFontRem, isSetupPreview = false) {
         clearPlayback();
         if(statusTarget) statusTarget.textContent = "Playing rhythm structure...";
         
         displayTarget.style.fontSize = baseMaxFontRem + "rem";
         displayTarget.textContent = "ーー";
+        if(isSetupPreview) sentencePreview.scrollTop = 0;
 
         recordedTimestamps.forEach((stamp, index) => {
             let id = setTimeout(() => {
                 const multiLineText = formatWordDisplay(stamp.word);
-                
-                // Route through our safety fitting calculator engine to guarantee no broken line wraps
                 updateTextWithAutoFit(displayTarget, multiLineText, baseMaxFontRem);
+                
+                if (isSetupPreview) {
+                    setActiveWordAndScroll(index);
+                }
                 
                 if (index === recordedTimestamps.length - 1) {
                     let finishId = setTimeout(() => {
@@ -641,7 +658,7 @@
 
     playBtn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
-        executePlayback(focusBox, statusSetup, 3.0); 
+        executePlayback(focusBox, statusSetup, 3.0, true); 
     });
 
     focusPlayBtn.addEventListener('pointerdown', (e) => {
@@ -655,14 +672,13 @@
         executePlayback(giantDisplayText, null, 5.5);
     });
 
-    // Navigation Matrix Switches
     toFocusViewBtn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         clearPlayback();
         mainContainer.classList.remove('immersive-active');
         setupView.classList.remove('active');
         immersiveView.classList.remove('active');
-        focusView.classList.add('active');
+        focusView.add('active');
         focusBox.style.fontSize = "3rem";
         focusBox.textContent = "ーー";
     });
