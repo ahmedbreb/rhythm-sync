@@ -34,7 +34,6 @@
             transition: all 0.2s ease;
         }
 
-        /* Container adjustment for immersive full screen */
         .container.immersive-active {
             max-width: 100%;
             background: #0f172a;
@@ -51,7 +50,6 @@
             color: #f1f5f9;
         }
 
-        /* Multi-View System Visibility Rules */
         .app-view {
             display: none;
             flex-direction: column;
@@ -62,21 +60,33 @@
             display: flex;
         }
 
+        /* Upgraded Quick Action Input Container */
         .input-group {
             margin-bottom: 15px;
         }
 
-        label {
-            display: block;
+        .input-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 6px;
+        }
+
+        label {
             font-weight: 600;
             font-size: 0.85rem;
             color: #94a3b8;
         }
 
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
         input[type="text"] {
             width: 100%;
-            padding: 12px;
+            padding: 12px 85px 12px 12px; /* Added right padding to prevent text overlapping buttons */
             background-color: #0f172a;
             border: 2px solid #334155;
             border-radius: 8px;
@@ -88,6 +98,30 @@
 
         input[type="text"]:focus {
             border-color: #38bdf8;
+        }
+
+        /* Inline Quick Action Buttons */
+        .inline-actions {
+            position: absolute;
+            right: 6px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .btn-inline {
+            background-color: #334155;
+            color: #94a3b8;
+            border: none;
+            padding: 8px 10px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            font-weight: bold;
+            min-width: 34px;
+        }
+
+        .btn-inline:active {
+            background-color: #475569;
+            color: #f8fafc;
         }
 
         .sentence-preview {
@@ -143,7 +177,6 @@
             border-color: #64748b;
         }
 
-        /* VIEW 2: Focus Standard View Elements */
         .focus-box {
             width: 100%;
             height: 180px;
@@ -180,7 +213,6 @@
             margin-bottom: 15px;
         }
 
-        /* VIEW 3: Immersive Fullscreen Mode Layout */
         .immersive-top-nav {
             display: flex;
             width: 100%;
@@ -196,7 +228,7 @@
         .faint-nav-btn {
             background: none;
             border: none;
-            color: #334155; /* Faint gray to completely blend out */
+            color: #334155;
             font-size: 0.85rem;
             font-weight: 500;
             padding: 8px 12px;
@@ -226,15 +258,14 @@
         }
 
         .giant-display-text {
-            font-size: 5.5rem; /* Massive font delivery */
+            font-size: 5.5rem;
             font-weight: 900;
             color: #38bdf8;
             text-align: center;
             text-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
-            pointer-events: none; /* Passes touch events straight through to the arena */
+            pointer-events: none;
         }
 
-        /* Button Framework */
         .controls-container {
             margin-top: auto;
             display: flex;
@@ -248,7 +279,7 @@
             gap: 10px;
         }
 
-        button {
+        button:not(.btn-inline) {
             padding: 15px 10px;
             font-size: 0.95rem;
             font-weight: bold;
@@ -260,7 +291,7 @@
             touch-action: manipulation;
         }
 
-        button:active {
+        button:not(.btn-inline):active {
             opacity: 0.8;
         }
 
@@ -300,8 +331,16 @@
         <h1>Chinese Rhythm Sync</h1>
         
         <div class="input-group">
-            <label for="sentenceInput">Enter words separated by spaces:</label>
-            <input type="text" id="sentenceInput" value="父母 给予 我 极大的 支持。">
+            <div class="input-label-row">
+                <label for="sentenceInput">Enter words separated by spaces:</label>
+            </div>
+            <div class="input-wrapper">
+                <input type="text" id="sentenceInput" value="父母 给予 我 极大的 支持。">
+                <div class="inline-actions">
+                    <button id="clearInputBtn" class="btn-inline" title="Clear Text">✕</button>
+                    <button id="pasteInputBtn" class="btn-inline" title="Paste from Clipboard">📋</button>
+                </div>
+            </div>
         </div>
 
         <div id="sentencePreview" class="sentence-preview"></div>
@@ -344,13 +383,11 @@
 
     <!-- VIEW 3: IMMERSIVE FULLSCREEN MODE -->
     <div id="immersiveView" class="app-view">
-        <!-- Faint Top Navigation Header Links -->
         <div class="immersive-top-nav">
             <button id="immToFocusBtn" class="faint-nav-btn">← Focus Mode</button>
             <button id="immToSetupBtn" class="faint-nav-btn">Setup Page ➔</button>
         </div>
 
-        <!-- Giant Tap Trigger Area Screen Overlay -->
         <div id="fullscreenTapArena" class="fullscreen-tap-arena">
             <div id="giantDisplayText" class="giant-display-text">TAP TO START</div>
         </div>
@@ -377,6 +414,8 @@
     const sentenceInput = document.getElementById('sentenceInput');
     const sentencePreview = document.getElementById('sentencePreview');
     const notesArea = document.getElementById('notesArea');
+    const clearInputBtn = document.getElementById('clearInputBtn');
+    const pasteInputBtn = document.getElementById('pasteInputBtn');
     
     const recordBtn = document.getElementById('recordBtn');
     const playBtn = document.getElementById('playBtn');
@@ -416,6 +455,28 @@
     function clearVisualHighlights() {
         document.querySelectorAll('.preview-word').forEach(span => span.classList.remove('active'));
     }
+
+    // New Input Quick Actions Logic
+    clearInputBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        sentenceInput.value = '';
+        renderSentencePreview();
+        statusSetup.textContent = "Input cleared.";
+    });
+
+    pasteInputBtn.addEventListener('pointerdown', async (e) => {
+        e.preventDefault();
+        try {
+            // Uses standard Web Clipboard API natively handled by Chrome Mobile
+            const text = await navigator.clipboard.readText();
+            sentenceInput.value = text;
+            renderSentencePreview();
+            statusSetup.textContent = "Text pasted from clipboard successfully!";
+        } catch (err) {
+            statusSetup.textContent = "Could not paste text automatically. Please long-press inside the box instead.";
+            console.error("Clipboard load failed: ", err);
+        }
+    });
 
     // Arm Recording
     recordBtn.addEventListener('pointerdown', (e) => {
@@ -523,9 +584,7 @@
         executePlayback(focusBox, statusFocus);
     });
 
-    // Fullscreen Immersive Screen Reset Tap Trigger
     fullscreenTapArena.addEventListener('pointerdown', (e) => {
-        // Prevent trigger activation if user accidentally clicks faint navigation text links instead
         if (e.target.classList.contains('faint-nav-btn')) return;
         e.preventDefault();
         executePlayback(giantDisplayText, null);
@@ -563,7 +622,6 @@
         giantDisplayText.textContent = "TAP ANYWHERE";
     });
 
-    // Connect top navigation inside immersive screen overlay layout mapping
     immToFocusBtn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         clearPlayback();
