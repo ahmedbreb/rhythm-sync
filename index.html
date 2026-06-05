@@ -123,12 +123,12 @@
             color: #f8fafc;
         }
 
-        /* Maximized Window: Increased to 220px to utilize empty space */
+        /* Maximized Window Maintained: Kept at 220px to utilize empty space safely */
         .sentence-preview {
             background-color: #0f172a;
             border: 2px solid #334155;
             border-radius: 8px;
-            padding: 12px 12px 120px 12px; /* Deep safety padding lets long final lines scroll up fully */
+            padding: 12px 12px 120px 12px; /* Deep safety padding lets long lines scroll up fully */
             margin-bottom: 8px;
             height: 220px; 
             max-height: 220px;
@@ -159,30 +159,30 @@
             text-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
         }
 
-        /* Repositioned & Enlarged Tap Zone: Placed right above buttons */
+        /* Maximized Tap Window: Increased to 120px height with larger font elements */
         .tap-zone {
             width: 100%;
-            height: 76px; 
-            min-height: 76px;
+            height: 120px; 
+            min-height: 120px;
             background-color: #1e293b;
             border: 2px dashed #38bdf8;
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.05rem;
+            font-size: 1.25rem;
             font-weight: bold;
             color: #38bdf8;
             cursor: pointer;
             user-select: none;
             margin-top: auto; /* Pushes it down above the control panel */
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             text-align: center;
-            padding: 8px;
+            padding: 12px;
             box-sizing: border-box;
             touch-action: manipulation;
             white-space: pre-wrap;
-            line-height: 1.3;
+            line-height: 1.4;
         }
 
         .tap-zone:active {
@@ -226,7 +226,7 @@
             resize: none;
             box-sizing: border-box;
             outline: none;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
 
         .immersive-top-nav {
@@ -322,6 +322,7 @@
         
         #toSetupViewBtn { background-color: #64748b; }
         #retryBtn { background-color: #475569; }
+        #clearNotesBtn { background-color: #d97706; margin-bottom: 10px; }
 
         .status-text {
             text-align: center;
@@ -385,6 +386,7 @@
 
         <label for="notesArea">Study Notes & Pinyin Window:</label>
         <textarea id="notesArea" class="notes-window" placeholder="Type structural notes..."></textarea>
+        <button id="clearNotesBtn">Clear Study Notes</button>
 
         <div class="controls-container">
             <button id="toImmersiveViewBtn">Go Immersive Fullscreen Mode</button>
@@ -429,6 +431,7 @@
     const notesArea = document.getElementById('notesArea');
     const clearInputBtn = document.getElementById('clearInputBtn');
     const pasteInputBtn = document.getElementById('pasteInputBtn');
+    const clearNotesBtn = document.getElementById('clearNotesBtn');
     
     const recordBtn = document.getElementById('recordBtn');
     const playBtn = document.getElementById('playBtn');
@@ -469,7 +472,6 @@
         localStorage.setItem('savedSentence', text);
     }
 
-    // Upgraded Scroll Engine: Proactive scrolling designed for large vertically stacked segments
     function setActiveWordAndScroll(index) {
         clearVisualHighlights();
         const activeSpan = document.getElementById(`word-${index}`);
@@ -483,12 +485,10 @@
         
         const currentScroll = sentencePreview.scrollTop;
         
-        // Triggers scroll adjustments earlier (45px clearance instead of 20px)
         const isBelowVisibleFrame = (elemTop + elemHeight) > (currentScroll + containerHeight - 45);
         const isAboveVisibleFrame = elemTop < currentScroll + 15;
 
         if (isBelowVisibleFrame || isAboveVisibleFrame) {
-            // Centers the block instantly, taking advantage of the large inner bottom-padding cushion
             sentencePreview.scrollTop = elemTop - (containerHeight / 2) + (elemHeight / 2);
         }
     }
@@ -553,6 +553,14 @@
         } catch (err) {
             statusSetup.textContent = "Could not paste text automatically.";
         }
+    });
+
+    // Clear notes feature trigger logic
+    clearNotesBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        notesArea.value = '';
+        localStorage.removeItem('savedNotes');
+        statusFocus.textContent = "Study notes cleared successfully.";
     });
 
     recordBtn.addEventListener('pointerdown', (e) => {
@@ -676,6 +684,7 @@
         mainContainer.classList.remove('immersive-active');
         setupView.classList.remove('active');
         immersiveView.classList.remove('active');
+        focusView.add('active'); // CSS layout view transition
         focusView.classList.add('active');
         focusBox.style.fontSize = "3rem";
         focusBox.textContent = "ーー";
