@@ -123,7 +123,7 @@
             color: #f8fafc;
         }
 
-        /* Maximized Window Maintained: Kept at 220px to utilize empty space safely */
+        /* Maximized Window: Kept at 220px to utilize empty space safely */
         .sentence-preview {
             background-color: #0f172a;
             border: 2px solid #334155;
@@ -159,7 +159,7 @@
             text-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
         }
 
-        /* Maximized Tap Window: Kept at 120px height with larger font elements */
+        /* Maximized Tap Window: 120px height with larger font elements */
         .tap-zone {
             width: 100%;
             height: 120px; 
@@ -226,7 +226,7 @@
             resize: none;
             box-sizing: border-box;
             outline: none;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
 
         .immersive-top-nav {
@@ -285,7 +285,7 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            margin-top: 0; 
+            margin-top: auto; 
         }
 
         .grid-buttons {
@@ -322,7 +322,16 @@
         
         #toSetupViewBtn { background-color: #64748b; }
         #retryBtn { background-color: #475569; }
-        #clearNotesBtn { background-color: #d97706; margin-bottom: 10px; }
+        
+        /* Repositioned Low-Impact Safe State Reset Button */
+        #clearNotesBtn { 
+            background-color: #334155; 
+            border: 1px solid #ef4444;
+            color: #f8fafc;
+            padding: 6px;
+            font-size: 0.75rem;
+            margin-top: 2px;
+        }
 
         .status-text {
             text-align: center;
@@ -386,7 +395,6 @@
 
         <label for="notesArea">Study Notes & Pinyin Window:</label>
         <textarea id="notesArea" class="notes-window" placeholder="Type structural notes..."></textarea>
-        <button id="clearNotesBtn">Clear Study Notes</button>
 
         <div class="controls-container">
             <button id="toImmersiveViewBtn">Go Immersive Fullscreen Mode</button>
@@ -394,6 +402,7 @@
                 <button id="focusPlayBtn">Play Rhythm</button>
                 <button id="toSetupViewBtn">← Back to Setup</button>
             </div>
+            <button id="clearNotesBtn">Clear Study Notes</button>
             <div id="statusFocus" class="status-text">Ready.</div>
         </div>
     </div>
@@ -677,7 +686,6 @@
         executePlayback(giantDisplayText, null, 5.5);
     });
 
-    // FIXED: Corrected token element method to prevent crash transitions
     toFocusViewBtn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         clearPlayback();
